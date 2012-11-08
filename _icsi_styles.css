@@ -382,7 +382,7 @@ form#headerSearchFrm input#headerSearchSubmit{
 	background: url(img/search.png) center center no-repeat, -webkit-linear-gradient(top,  rgba(78,174,66,1) 25%,rgba(23,148,6,1) 75%); /* Chrome10+,Safari5.1+ */
 	background: url(img/search.png) center center no-repeat, -o-linear-gradient(top,  rgba(78,174,66,1) 25%,rgba(23,148,6,1) 75%); /* Opera 11.10+ */
 	background: url(img/search.png) center center no-repeat, -ms-linear-gradient(top,  rgba(78,174,66,1) 25%,rgba(23,148,6,1) 75%); /* IE10+ */
-	background: linear-gradient(to bottom,  rgba(78,174,66,1) 25%,rgba(23,148,6,1) 75%); /* W3C */
+	background: url(img/search.png) center center no-repeat, linear-gradient(to bottom,  rgba(78,174,66,1) 25%,rgba(23,148,6,1) 75%); /* W3C */
 	
 	/*color: white;
 	font-family: Helvetica, sans-serif;
