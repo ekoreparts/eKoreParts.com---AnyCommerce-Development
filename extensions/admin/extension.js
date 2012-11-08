@@ -26,9 +26,8 @@ finder -
 'safePath' is used for a jquery friendly id. ex: .safe.name gets converted to _safe_name and $mylistid to mylistid).
 
 
-NOTE
- - admin 'set' calls are hard coded to use the immutable Q so that a dispatch is not overridden.
- - in the calls, 'dispatch' was removed and only init is present IF we never check local storage for the data.
+NOTE - admin 'set' calls are hard coded to use the immutable Q so that a dispatch is not overridden.
+
 */
 
 
@@ -39,8 +38,8 @@ var admin = function() {
 	var r = {
 		
 	vars : {
-		tab : null, //is set when switching between tabs. it outside 'state' because this doesn't get logged into local storage.
-		state : {},
+		"dependAttempts" : 0,  //used to count how many times loading the dependencies has been attempted.
+//though most extensions don't have the templates specified, checkout does because so much of the code is specific to these templates.
 		templates : theseTemplates,
 		willFetchMyOwnTemplates : true,
 		"tags" : ['IS_FRESH','IS_NEEDREVIEW','IS_HASERRORS','IS_CONFIGABLE','IS_COLORFUL','IS_SIZEABLE','IS_OPENBOX','IS_PREORDER','IS_DISCONTINUED','IS_SPECIALORDER','IS_BESTSELLER','IS_SALE','IS_SHIPFREE','IS_NEWARRIVAL','IS_CLEARANCE','IS_REFURB','IS_USER1','IS_USER2','IS_USER3','IS_USER4','IS_USER5','IS_USER6','IS_USER7','IS_USER8','IS_USER9'],
@@ -124,7 +123,7 @@ var admin = function() {
 					app.model.addDispatchToQ(obj,Q);
 					}
 				},
-
+//app.ext.admin.calls.product.adminProductUpdate.init(pid,attrObj,tagObj,Q)
 			adminCustomerSet : {
 				init : function(CID,setObj,tagObj)	{
 					this.dispatch(CID,setObj,tagObj)
@@ -133,7 +132,7 @@ var admin = function() {
 				dispatch : function(CID,setObj,tagObj)	{
 					var obj = {};
 					tagObj = $.isEmptyObject(tagObj) ? {} : tagObj; 
-					obj["_cmd"] = "adminCustomerSet";
+					obj["_cmd"] = "adminProductUpdate";
 					obj["CID"] = CID;
 					obj['%set'] = setObj;
 					obj["_tag"] = tagObj;
@@ -210,27 +209,7 @@ var admin = function() {
 					}
 				} //adminNavcatProductDelete
 			
-			}, //finder
-
-
-
-
-//obj requires sub and sref.  sub can be LOAD or SAVE
-			adminUIBuilderPanelExecute : {
-				init : function(obj,tagObj,Q)	{
-					tagObj = tagObj || {};
-					if(obj['sub'] == 'EDIT')	{
-						tagObj.datapointer = "adminUIBuilderPanelExecute";
-						}
-					this.dispatch(obj,tagObj,Q);
-					},
-				dispatch : function(obj,tagObj,Q)	{
-					obj['_cmd'] = "adminUIBuilderPanelExecute";
-//					obj['_SREF'] = "BAcEMTIzNAQEBAgZAAcAAAAKBFBBR0UCBgAAAEZPUk1BVAoBMQILAAAAX2lzX3ByZXZpZXcKAUECAgAAAEZTFwthYm91dF8zcGljcwIFAAAARE9DSUQKB2Fib3V0dXMCAgAAAFBHCgdERUZBVUxUAgIAAABOUwoBMAIDAAAAUFJU"; /// !!! DO NOT HARD CODE THIS
-					obj["_tag"] = tagObj;
-					app.model.addDispatchToQ(obj,Q);
-					}
-				} //adminUIProductPanelList
+			} //finder
 
 		}, //calls
 
@@ -248,16 +227,10 @@ var admin = function() {
 //the callback is auto-executed as part of the extensions loading process.
 		init : {
 			onSuccess : function()	{
-				app.u.dump('BEGIN app.ext.admin.init.onSuccess ');
+//				app.u.dump('BEGIN app.ext.admin.init.onSuccess ');
 				var r = true; //return false if extension can't load. (no permissions, wrong type of session, etc)
 //app.u.dump("DEBUG - template url is changed for local testing. add: ");
-app.model.fetchNLoadTemplates(app.vars.baseURL+'extensions/admin/templates.html',theseTemplates);
-
-
-app.rq.push(['css',0,'https://www.zoovy.com/biz/ajax/showLoading/css/showLoading.css']);
-app.rq.push(['css',0,'https://www.zoovy.com/biz/ajax/flexigrid-1.1/css/flexigrid.pack.css']);
-app.rq.push(['css',0,'https://www.zoovy.com/biz/ajax/jquery.qtip-1.0.0-rc3/jquery.qtip.min.css']);
-app.rq.push(['css',0,'https://www.zoovy.com/biz/ajax/jquery.contextMenu/jquery.contextMenu.css']);
+app.model.fetchNLoadTemplates('http://static.zoovy.com/graphics/general/jslib/zmvc/201231/extensions/admin/templates.html',theseTemplates);
 
 				return r;
 				},
@@ -267,41 +240,6 @@ app.rq.push(['css',0,'https://www.zoovy.com/biz/ajax/jquery.contextMenu/jquery.c
 			}, //init
 
 
-		showDataHTML : {
-			onSuccess : function(tagObj)	{
-//				app.u.dump("SUCCESS!"); app.u.dump(tagObj);
-				$('#'+tagObj.targetID).removeClass('loadingBG').html(app.data[tagObj.datapointer].html); //.wrap("<form id='bob'>");
-
-				}
-			}, //init
-
-		initUserInterface : {
-			onSuccess : function()	{
-				app.u.dump('BEGIN app.ext.admin.initUserInterface.onSuccess ');
-				var L = app.rq.length-1;
-//				die();
-				for(var i = L; i >= 0; i -= 1)	{
-					app.u.handleResourceQ(app.rq[i]);
-					app.rq.splice(i, 1); //remove once handled.
-					}
-				app.rq.push = app.u.handleResourceQ; //reassign push function to auto-add the resource.
-
-				$('.bindByAnchor','#mastHead').click(function(event){
-					event.preventDefault();
-					showUI($(this).attr('href'));
-					})
-
-				window.navigateTo = app.ext.admin.a.navigateTo;
-				window.showUI = app.ext.admin.a.showUI;
-				window.loadElement = app.ext.admin.a.loadElement;
-
-				$('.username').text(app.vars.username);
-				
-				//yes, this is global.
-				$loadingModal = $('<div />').attr('id','loadingModal').addClass('loadingBG displayNone');
-				$loadingModal.appendTo('body').dialog({'autoOpen':false});
-				}
-			},
 
 		handleElasticFinderResults : {
 			onSuccess : function(tagObj)	{
@@ -323,7 +261,7 @@ app.rq.push(['css',0,'https://www.zoovy.com/biz/ajax/jquery.contextMenu/jquery.c
 					app.ext.admin.u.filterFinderResults();
 					}
 				}
-			}, //handleElasticFinderResults
+			},
 
 
 
@@ -342,7 +280,7 @@ app.rq.push(['css',0,'https://www.zoovy.com/biz/ajax/jquery.contextMenu/jquery.c
 			onSuccess : function(tagObj)	{
 //				app.u.dump("BEGIN admin.callback.addPIDFinderToDom.success");
 				app.ext.admin.u.addFinder(tagObj.targetID,tagObj.path,tagObj.datapointer.split('|')[1]);
-				$('#prodFinder').parent().find('.ui-dialog-title').text('Product Finder: '+app.data[tagObj.datapointer]['%attribs']['zoovy:prod_name']+" ("+app.renderFunctions.parseDataVar(tagObj.path)+")"); //updates modal title
+				$('#prodFinder').parent().find('.ui-dialog-title').text('Product Finder: '+app.data[tagObj.datapointer]['%attribs']['zoovy:prod_name']); //updates modal title
 //				app.u.dump(tagObj);
 				}
 			}, //addPIDFinderToDom
@@ -362,7 +300,6 @@ app.rq.push(['css',0,'https://www.zoovy.com/biz/ajax/jquery.contextMenu/jquery.c
 			
 			}, //pidFinderChangesSaved
 //when a finder for a category/list/etc is executed...
-
 		finderChangesSaved : {
 			onSuccess : function(tagObj)	{
 
@@ -412,13 +349,13 @@ app.ext.admin.u.changeFinderButtonsState('enable'); //make buttons clickable
 //callback is used for the product finder search results.
 		showProdlist : {
 			onSuccess : function(tagObj)	{
-//				app.u.dump("BEGIN admin.callbacks.showProdlist");
+				app.u.dump("BEGIN admin.callbacks.showProdlist");
 				if($.isEmptyObject(app.data[tagObj.datapointer]['@products']))	{
 					$('#'+tagObj.parentID).empty().removeClass('loadingBG').append('Your search returned zero results');
 					}
 				else	{
-//				app.u.dump(" -> parentID: "+tagObj.parentID);
-//				app.u.dump(" -> datapointer: "+tagObj.datapointer);
+				app.u.dump(" -> parentID: "+tagObj.parentID);
+				app.u.dump(" -> datapointer: "+tagObj.datapointer);
 				var numRequests = app.ext.store_prodlist.u.buildProductList({
 "templateID":"adminProdStdForList",
 "parentID":tagObj.parentID,
@@ -457,9 +394,6 @@ app.ext.admin.u.changeFinderButtonsState('enable'); //make buttons clickable
 				}
 			}, //finderProductUpdate
 
-
-
-
 		filterFinderSearchResults : {
 			onSuccess : function(tagObj)	{
 //				app.u.dump("BEGIN admin.callbacks.filterFinderSearchResults");
@@ -469,7 +403,6 @@ app.ext.admin.u.changeFinderButtonsState('enable'); //make buttons clickable
 				//go through the results and if they are already in this category, disable drag n drop.
 				$results = $('#finderSearchResults');
 				//.find( "li" ).addClass( "ui-corner-all" ) )
-
 				$results.find('li').each(function(){
 					$tmp = $(this);
 					if($('#finderTargetList_'+$tmp.attr('data-pid')).length > 0)	{
@@ -484,120 +417,57 @@ app.ext.admin.u.changeFinderButtonsState('enable'); //make buttons clickable
 
 		}, //callbacks
 
-	
+		validate : {}, //validate
+		
+		
 		
 ////////////////////////////////////   RENDERFORMATS    \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 		
 		
-	renderFormats : {
-		
-		elastimage1URL : function($tag,data)	{
+		renderFormats : {
+			
+			elastimage1URL : function($tag,data)	{
 //				app.u.dump(data.value[0]);
 //				var L = data.bindData.numImages ? data.bindData.numImages : 1; //default to only showing 1 image.
 //				for(var i = 0; i < L; i += 1)	{
 //					}
-			$tag.attr('src',app.u.makeImage({"name":data.value[0],"w":50,"h":50,"b":"FFFFFF","tag":0}));
-			},
-		
-	
-		array2ListItems : function($tag,data)	{
-			var L = data.value.length;
-			app.u.dump(" -> cleanValue for array2listItems");
-			app.u.dump(data.value);
-			var $o = $("<ul />"); //what is appended to tag. 
-			for(var i = 0; i < L; i += 1)	{
-				$o.append("<li>"+data.value[i]+"<\/li>");
-				}
-			$tag.append($o.children());
-			},
-		
-		array2Template : function($tag,data)	{
+				$tag.attr('src',app.u.makeImage({"name":data.value[0],"w":50,"h":50,"b":"FFFFFF","tag":0}));
+				},
+			
+			array2ListItems : function($tag,data)	{
+				var L = data.value.length;
+				app.u.dump(" -> cleanValue for array2listItems");
+				app.u.dump(data.value);
+				var $o = $("<ul />"); //what is appended to tag. 
+				for(var i = 0; i < L; i += 1)	{
+					$o.append("<li>"+data.value[i]+"<\/li>");
+					}
+				$tag.append($o.children());
+				},
+			
+			array2Template : function($tag,data)	{
 //				app.u.dump("BEGIN admin.renderFormats.array2Template");
 //				app.u.dump(data.value);
-			var L = data.value.length;
-			for(var i = 0; i < L; i += 1)	{
-				$tag.append(app.renderFunctions.transmogrify({},data.bindData.loadsTemplate,data.value[i])); 
+				var L = data.value.length;
+				for(var i = 0; i < L; i += 1)	{
+					$tag.append(app.renderFunctions.transmogrify({},data.bindData.loadsTemplate,data.value[i])); 
+					}
 				}
-			}
-		
-		}, //renderFormats
+			
+			},
 
 
 
 
 
 ////////////////////////////////////   ACTION    \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-		a : {
-
-			showUI : function(path,P)	{
-				app.u.dump("BEGIN admin.a.showUI ["+path+"]");
-				$('html, body').animate({scrollTop : 0},1000);
-//				$loadingModal.dialog('open');
-				P = P || {};
-				if(path)	{
-					$('title').text(path);
-					
-					
-					var tab = app.ext.admin.u.getTabFromPath(path);
-					P.targetID = app.ext.admin.u.getId4UIContent(path)
-					var $target = $('#'+P.targetID);
-
-//					app.u.dump(" -> tab: "+tab); app.u.dump(" -> targetid: "+P.targetID);
-					
-					$(".tabContent",'#appView').hide(); //hide all tab contents
-					$target.show(); //show focus tab.
-						
-					if($target.children().length === 0)	{
-						//this means the section has NOT been opened before.
-						app.u.dump(" -> section has NOT been rendered before. Render it.");
-						app.ext.admin.u.handleShowSection(path,P,$target);
-						}
-					else if(tab == app.ext.admin.vars.tab)	{
-						//we are moving within the same section.
-						app.u.dump(" -> Moving within same section, Render it.");
-						app.ext.admin.u.handleShowSection(path,P,$target);
-						}
-					else	{
-						//jumping between sections. content has already been displayed by here. do nothing.
-
-						}
-
-					app.ext.admin.vars.tab = tab; //do this last so that the previously selected tab can be used.
-					}
-				else	{
-					app.u.throwMessage("Warning! a required param for showUI was not set. path: '"+path+"' and typeof "+obj);
-					}
-				return false;
-				},
-
-//this is a function that brian has in the UI on some buttons.
-//it's diferent than showUI so we can add extra functionality if needed.
-			navigateTo : function(path)	{
-				this.showUI(path);
-				},
 
 
-//used in the builder for when 'edit' is clicked on an element.
-//Params are set by B. This is for legacy support in the UI.
-
-			loadElement : function(type,eleID){
-				app.ext.admin.calls.adminUIBuilderPanelExecute.init({'sub':'EDIT','id':eleID},{'callback':'showDataHTML','extension':'admin','targetID':'elementEditor'});
-				app.model.dispatchThis();
-				var $editor = $('#elementEditor');
-				if($editor.length)	{
-					$editor.empty(); //modal already exists. empty previous content. Currently, one editor at a time.
-					} 
-				else	{
-					$editor = $("<div \/>").attr('id','elementEditor').appendTo('body');
-					$editor.dialog({autoOpen:false,dialog:true});
-					}
-				$editor.dialog('open').addClass('loadingBG');
-				},
-
-
+//there are links in the UI that reference .action, so don't change this without updating the UI.
+		action : {
 /*
 to generate an instance of the finder, run: 
-app.ext.admin.a.addFinderTo() passing in targetID (the element you want the finder appended to) and path (a cat safe id or list id)
+app.ext.admin.action.addFinderTo() passing in targetID (the element you want the finder appended to) and path (a cat safe id or list id)
 
 */
 			addFinderTo : function(targetID,path,sku)	{
@@ -610,10 +480,7 @@ app.ext.admin.a.addFinderTo() passing in targetID (the element you want the find
 					}
 				app.model.dispatchThis();
 				}, //addFinderTo
-				
-				
-				
-//path - category safe id or product attribute in data-bind format:    product(zoovy:accessory_products)
+
 			showFinderInModal : function(path,sku)	{
 				var $finderModal = $('#prodFinder');
 //a finder has already been opened. empty it.
@@ -643,120 +510,10 @@ app.ext.admin.a.addFinderTo() passing in targetID (the element you want the find
 
 		u : {
 			
-//executed from within showUI. probably never want to execute this function elsewhere.
-			handleShowSection : function(path,P,$target)	{
-				var tab = app.ext.admin.u.getTabFromPath(path);
-				if(tab == 'product')	{
-					app.u.dump(" -> open product editor");
-					app.ext.admin_prodEdit.u.showProductEditor(path,P);
-					}
-				else	{
-//					app.u.dump(" -> open something wonderful...");
-					$target.empty().append("<div class='loadingBG'></div>");
-					app.model.fetchAdminResource(path,P);
-					}
-				},
 
-			getId4UIContent : function(path){
-				return this.getTabFromPath(path)+"Content";
-				},
-			
-			getTabFromPath : function(path)	{
-				return path.split("/")[2];
-				},
-			
-			uiHandleMessages : function(path,msg)	{
-//				app.u.dump("BEGIN admin.u.uiHandleMessages ["+path+"]");
-				if(msg)	{
-					var L = msg.length;
-					var msgType, msgObj; //recycled.
-					var tab = this.getTabFromPath(path);
-					for(var i = 0; i < L; i += 1)	{
-						msgObj = app.u.uiMsgObject(msg[i]);
-						msgObj.persistant = true; //for testing, don't hide.
-						msgObj.parentID = tab+"Content"; //put messaging in tab specific area.
-						app.u.throwMessage(msgObj);
-						}
-					}
-				else	{
-					//no message. it happens sometimes.
-					}
-				},
-			
-			uiHandleBreadcrumb : function(bc)	{
-				var $target = $('#breadcrumb').empty(); //always empty to make sure the last set isn't displayed (the new page may not have bc)
-				if(bc)	{
-					var L = bc.length;
-					for(var i = 0; i < L; i += 1)	{
-						if(i){$target.append(" &#187; ")}
-						if(bc[i]['link'])	{
-							$target.append("<a href='#' onClick='return showUI(\""+bc[i]['link']+"\");' title='"+bc[i].name+"'>"+bc[i].name+"<\/a>");
-							}
-						else	{
-							$target.append(bc[i].name);
-							}
-						}
-					}
-				else	{
-					app.u.dump("WARNING! admin.u.handleBreadcrumb bc is blank. this may be normal.");
-					}
-				},
-
-			uiHandleNavTabs : function(tabs)	{
-				var $target = $('#navTabs').empty(); //always empty to make sure the last set isn't displayed (the new page may not have tabs)
-				if(tabs)	{
-					var L = tabs.length;
-					var className; //recycled in loop.
-					for(var i = 0; i < L; i += 1)	{
-						className = tabs[i].selected ? 'header_sublink_active' : 'header_sublink'
-						$target.append("<a href='#' onClick='return showUI(\""+tabs[i]['link']+"\");' title='"+tabs[i].name+"' class='"+className+"'><span>"+tabs[i].name+"<\/span><\/a>");
-						}
-					}
-				else	{
-					app.u.dump("WARNING! admin.u.uiHandleNavTabs tabs is blank. this may be normal.");
-					}
-				},
-
-			uiHandleFormRewrites : function(path,data,viewObj)	{
-//				app.u.dump("BEGIN admin.u.uiHandleFormRewrites");
-//				app.u.dump(" -> data: "); app.u.dump(data);
-//				app.u.dump(" -> viewObj: "); app.u.dump(viewObj);
-				var $target = $('#'+viewObj.targetID)
-				$target.html(data.html);
-//any form elements in the response have their actions rewritten.
-				$('form',$target).submit(function(event){
-//					app.u.dump(" -> Executing custom form submit.");
-					event.preventDefault();
-					var jsonObj = $(this).serializeJSON();
-//					app.u.dump(" -> jsonObj: "); app.u.dump(jsonObj);
-					app.model.fetchAdminResource(path,{},jsonObj); //handles the save.
-					return false;
-					}); //submit
-				},
-			
-			uiHandleLinkRewrites : function(path,data,viewObj)	{
-//				app.u.dump("BEGIN admin.u.uiHandleLinkRewrites("+path+")");
-				var $target = $('#'+viewObj.targetID)
-				$('a',$target).click(function(event){
-					var href = $(this).attr('href');
-					$(this).attr('title',href); // HERE FOR TESTING
-					if(href.indexOf("/biz/") == 0)	{
-						event.preventDefault();
-						return showUI(href);
-						}
-//this could happen in the website builder where the 'edit' links are not fully pathed.
-					else if(href.indexOf("index.cgi?") == 0)	{
-						event.preventDefault();
-						return showUI(path+'?'+href.split('?')[1]); //passes params to whatever the parent path was.
-						}
-					else	{
-						//no match.
-						}
-					});
-				},
 			
 			saveFinderChanges : function()	{
-//				app.u.dump("BEGIN admin.u.saveFinderChanges");
+				app.u.dump("BEGIN admin.u.saveFinderChanges");
 				var myArray = new Array();
 				var $tmp;
 				var $finderModal = $('#prodFinder')
@@ -800,7 +557,7 @@ $('#finderRemovedList').find("li").each(function(){
 //concat both lists (updates and removed) and loop through looking for what's changed or been removed.				
 $("#finderTargetList li").each(function(index){
 	$tmp = $(this);
-//	app.u.dump(" -> pid: "+$tmp.attr('data-pid')+"; status: "+$tmp.attr('data-status')+"; index: "+index+"; $tmp.index(): "+$tmp.index());
+	app.u.dump(" -> pid: "+$tmp.attr('data-pid')+"; status: "+$tmp.attr('data-status')+"; index: "+index+"; $tmp.index(): "+$tmp.index());
 	
 	if($tmp.attr('data-status') == 'changed')	{
 		$tmp.attr('data-status','queued')
@@ -818,8 +575,7 @@ app.ext.admin.calls.navcats.appCategoryDetailNoLocal.init(path,{"callback":"find
 
 
 
-
-
+			
 //onclick, pass in a jquery object of the list item
 			removePidFromFinder : function($listItem){
 //app.u.dump("BEGIN admin.u.removePidFromFinder");
@@ -865,7 +621,7 @@ var safePath = app.u.makeSafeHTMLId(path);
 app.u.dump(" -> safePath: "+safePath);
 var prodlist = new Array();
 
-var $target = $('#'+targetID).empty(); //empty to make sure we don't get two instances of finder if clicked again.
+$target = $('#'+targetID).empty(); //empty to make sure we don't get two instances of finder if clicked again.
 //create and translate the finder template. will populate any data-binds that are set that refrence the category namespace
 $target.append(app.renderFunctions.createTemplateInstance('adminProductFinder',"productFinder_"+app.u.makeSafeHTMLId(path)));
 
@@ -877,7 +633,7 @@ if(pid)	{
 	app.u.dump(" -> ATTRIBUTE: "+attribute);
 //	app.u.dump(" -> aattribute value = "+app.data['appProductGet|'+pid]['%attribs'][attribute]);
 	if(app.data['appProductGet|'+pid]['%attribs'][attribute])
-		prodlist = app.ext.store_prodlist.u.handleAttributeProductList(app.data['appProductGet|'+pid]['%attribs'][attribute]);
+		prodlist = app.data['appProductGet|'+pid]['%attribs'][attribute].split(',');
 	}
 else	{
 	app.u.dump(" -> NON product attribute (no pid specified)");
@@ -1000,10 +756,9 @@ $('#finderSearchForm').submit(function(event){
 				var $tmp;
 //go through the results and if they are already in this category, disable drag n drop.
 				$results = $('#finderSearchResults');
-				var sku = $results.closest('[data-sku]').attr('data-sku');
 				$results.find('li').each(function(){
 					$tmp = $(this);
-					if($('#finderTargetList_'+$tmp.attr('data-pid')).length > 0 || $tmp.attr('data-pid') == sku)	{
+					if($('#finderTargetList_'+$tmp.attr('data-pid')).length > 0)	{
 //						app.u.dump(" -> MATCH! disable dragging.");
 						$tmp.addClass('ui-state-disabled');
 						}
@@ -1073,7 +828,6 @@ else	{
 
 
 				} //bindFinderButtons
-
 
 
 

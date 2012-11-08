@@ -1,0 +1,29 @@
+#tier1categories, #newsletter{
+	display: none;
+}
+
+#categories h2{
+	cursor: pointer;
+}
+
+#main.growClass {
+	width: 100%;
+}
+
+#main.growClass ul#homepageFeaturedItems li {
+	margin: 10px 32px;
+	width: 260px;
+}
+
+#main.growClass ul#homepageFeaturedItems {
+	height: 340px;
+}
+
+#main.growClass ul li.prodListOuterContainer{
+	width: 180px;
+	margin: 16px 32px;
+}
+
+#tier1categories.showClass {
+	display: block;
+}

@@ -86,8 +86,8 @@ if(buySAFE.Hash.length > 0)	{
 		var order = app.data['order|'+P.orderID].cart;
 	
 	   buySAFE.Guarantee.order = P.orderID;
-	   buySAFE.Guarantee.subtotal = order['sum/items_total']
-	   buySAFE.Guarantee.email = order['bill/email'];
+	   buySAFE.Guarantee.subtotal = order['data.order_subtotal']
+	   buySAFE.Guarantee.email = order['data.bill_email'];
 	   WriteBuySafeGuarantee("JavaScript");	
 	
 		}); // end .push					

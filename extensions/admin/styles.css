@@ -34,8 +34,11 @@ button.ui-button-text	{padding:2px 4px;} /*jqueryui uses a lot of spans for butt
 
 .ui-accordion .ui-accordion-header	{padding-left:30px;}
 
-.lookLikeLink	{cursor:pointer; color:#0066CC;}
-.pointer	{cursor:pointer;}
+
+
+
+
+
 
 
 .editable	{} /* empty class, but reserved. used w/ jeditable. added to any element that will be editable, once enabled. */
@@ -71,6 +74,83 @@ a.editTextLink, .editTextLink	{font-size:11px; color:#0066FF;}
 
 
 
+
+
+/*
+
+FINDER STYLES
+
+
+*/
+
+
+/*
+any div that is going to be the container for a product finder should have this class.
+the exception to this would be in a pad-specific environment or if opening the finder in a dialog/modal
+*/
+
+.finderContainer	{width:100%; margin:12px 0;}
+.finderContainer .ui-widget-header	{padding:4px;}
+
+
+.finderSearch	{border:1px solid #cccccc; width:300px;} /* search keyword input */
+.finderContainer .ui-button-text-icon-secondary	{font-size:.7em} /* search button */
+.finderContainer section.ui-widget-content	{border-top:0;} /* content area (below header). header has bottom border */
+
+
+#finderSearchFilters fieldset	{border-bottom:1px solid #cccccc; padding-bottom:12px; margin-bottom:12px;}
+
+/*
+used in the template for a product finder.
+use only variable widths, so that the finder expands proportionally depending
+on it's container element.
+*/
+.finderTable	{width:96%; margin:0 auto;}
+.finderTable	td {padding:6px; width:50%;}
+
+
+
+/* for product lists in a finder. */
+
+/* scrolly-div for product lists */
+.finderProdlistContainer	{height:350px; overflow-y:auto; overflow-x:hidden;}
+
+/*
+parent element for list (either ol or ul)
+min-height is there to make dropping easy for small/empty lists. min-height should match height of finderProdlistContainer
+*/
+.finderProdlist	{margin:0; padding:0; list-style:none; min-height:350px; font-size:.9em}
+
+/*
+a border is added 'on selected' so a white border is added by default to avoid 'jumping'.
+the right padding is to accomodate the handle and removeProd elements.
+ */
+.finderProdlist li	{clear:both; margin:6px 0; position:relative; list-style:none; border:1px solid #ffffff; border-left-width:0; border-right-width:0; position:relative; background:#ffffff; min-height:40px;}
+.finderProdlist li:hover	{border-color: #cccccc;}
+
+.finderProdlist .prodThumb	{float:left; margin-right:12px;}
+.finderProdlist .pid	{font-size:.8em}
+.finderProdlist .prodName	{margin-right:55px;}
+
+
+/*
+styles for lists that are selectable
+a background on the target element may require an implicit override here.
+*/
+.ui-selecting, .finderProdlist li.ui-selecting { background: #eee; }
+.ui-selected , .finderProdlist li.ui-selected{ background: #def; !important }
+.targetList .ui-selected { background: #none; } /* add a class of targetList around any drop point so that the 'selected' background goes away */
+
+/* if a list is selectable and sortable, add an element with a handle class */
+.ui-selecting .handle { background: #ddd; }
+.ui-selected .handle { background: #cde; }
+
+
+.finderResults	{z-index:100;}
+.removeProd	{background:#ffe7e7; position: absolute; right: 29px; top: 0; bottom: 0; padding:14px 6px 0 6px; border-right:1px solid #ffffff; cursor:pointer;}
+
+/* the remove feature is only available on the target side */
+.finderResults .removeProd	{display:none;}
 
 
 /* a global 'handle' class for now. for consistency. 
@@ -176,127 +256,59 @@ li.loadingBG	{background:url(images/wait.gif) no-repeat center center  !importan
 
 
 
-
-/*
-
-########################################################
-
-FINDER
-
-########################################################
-
-*/
-
-
-/*
-any div that is going to be the container for a product finder should have this class.
-the exception to this would be in a pad-specific environment or if opening the finder in a dialog/modal
-*/
-
-.finderContainer	{width:100%; margin:12px 0;}
-.finderContainer .ui-widget-header	{padding:4px;}
-
-
-.finderSearch	{border:1px solid #cccccc; width:300px;} /* search keyword input */
-.finderContainer .ui-button-text-icon-secondary	{font-size:.7em} /* search button */
-.finderContainer section.ui-widget-content	{border-top:0;} /* content area (below header). header has bottom border */
-
-
-#finderSearchFilters fieldset	{border-bottom:1px solid #cccccc; padding-bottom:12px; margin-bottom:12px;}
-
-/*
-used in the template for a product finder.
-use only variable widths, so that the finder expands proportionally depending
-on it's container element.
-*/
-.finderTable	{width:96%; margin:0 auto;}
-.finderTable	td {padding:6px; width:50%;}
-
-
-
-/* for product lists in a finder. */
-
-/* scrolly-div for product lists */
-.finderProdlistContainer	{height:350px; overflow-y:auto; overflow-x:hidden;}
-
-/*
-parent element for list (either ol or ul)
-min-height is there to make dropping easy for small/empty lists. min-height should match height of finderProdlistContainer
-*/
-.finderProdlist	{margin:0; padding:0; list-style:none; min-height:350px; font-size:.9em}
-
-/*
-a border is added 'on selected' so a white border is added by default to avoid 'jumping'.
-the right padding is to accomodate the handle and removeProd elements.
- */
-.finderProdlist li	{clear:both; margin:6px 0; position:relative; list-style:none; border:1px solid #ffffff; border-left-width:0; border-right-width:0; position:relative; background:#ffffff; min-height:40px;}
-.finderProdlist li:hover	{border-color: #cccccc;}
-
-.finderProdlist .prodThumb	{float:left; margin-right:12px;}
-.finderProdlist .pid	{font-size:.8em}
-.finderProdlist .prodName	{margin-right:55px;}
-
-
-/*
-styles for lists that are selectable
-a background on the target element may require an implicit override here.
-*/
-.ui-selecting, .finderProdlist li.ui-selecting { background: #eee; }
-.ui-selected , .finderProdlist li.ui-selected{ background: #def; !important }
-.targetList .ui-selected { background: #none; } /* add a class of targetList around any drop point so that the 'selected' background goes away */
-
-/* if a list is selectable and sortable, add an element with a handle class */
-.ui-selecting .handle { background: #ddd; }
-.ui-selected .handle { background: #cde; }
-
-
-.finderResults	{z-index:100;}
-.removeProd	{background:#ffe7e7; position: absolute; right: 29px; top: 0; bottom: 0; padding:14px 6px 0 6px; border-right:1px solid #ffffff; cursor:pointer;}
-
-/* the remove feature is only available on the target side */
-.finderResults .removeProd	{display:none;}
-
-
-
 /*
 
 ########################################################
 
 
-Messaging Styles
+ORDER MANAGER
 
 ########################################################
 
 */
-.appMessage	{margin-bottom:12px;}
-.appMessage .stdMargin {padding:5px;}
 
-.appMessage .ui-icon	{float:left; margin-right:12px;}
-/* some messages have a red bg. add a white circle around the icon in these cases. */
-.ui-state-z-ise .ui-icon, .ui-state-z-error .ui-icon	{
-	background-color:#ffffff;
-	-webkit-border-radius: 4px;
-	border-radius: 4px;
-	}
+/*
+order list
+*/
 
-/*.appMessage .ui-icon-alert	{background:url(images/error-82x82.png) no-repeat; height:82px; width:82px; margin:0 10px 10px 0;} */
-.appMessage .appMessageTxt	{float:left;}
-
-.ui-state-z-message	{border:1px solid #666666; background:#efefef; color:#333333;}
-
-.ui-state-z-ise, .ui-state-z-error	{border:1px solid #CC0000; background:#CC0000; color:#ffffff;}
-
-.ui-state-z-success .success	{background:none;} /* compensates for bg image for standard.css */
-
-.ui-icon-z-ise	{background:url(images/ise-25x22.png) no-repeat center center; width:29px; height:26px;}
-.ui-icon-z-error	{background: url(images/error-25x25.png) no-repeat center center; width:29px; height:29px;}
-
-.ui-icon-z-legacy	{background:url(images/legacy-25x22.png) no-repeat; width:25px; height:22px;}
-.ui-icon-z-todo	{background: url(images/todo-25x29.png) no-repeat; width:25px; height:29px;}
-.ui-icon-z-hint	{background: url(images/hint-25x25.png) no-repeat; width:25px; height:25px;}
-.ui-icon-z-success	{background: url(images/success-25x25.png) no-repeat; width:25px; height:29px;}
+#orderListMessaging	{max-height:220px; overflow:auto;}
+#orderList	{margin:0 auto;font-size:.8em;} /* the container. the margin will center it on the page */
+.orderListTable, #orderListTable	{width:100%;}
 
 
+.orderListTable	td.mainCol	{vertical-align:top;}
+.orderListTable	td.leftCol	{width:180px; vertical-align:top; height:100%;}
+.orderListTable	td.mainCol .ui-widget-header	{padding:2px 12px;}
+.orderListTable	td.leftCol .ui-widget-content	{border-right:none;}
+
+#orderListTableContainer	{min-height:450px;} /* decreases 'jumpiness' between loading and loaded */
+#orderFilters h4	{margin:1px 6px;}
+#orderFilters ul	{margin-bottom:12px;}
+#orderFilters li	{padding:1px 12px;}
+
+.viewOrderIframe, .bulkMailIframe	{width:94%; margin:0 auto; height:500px; border:0; text-align:center;}
+
+
+
+/*
+order detail
+*/
+.orderDetailHeader	{padding-bottom:12px; border-bottom:1px solid #efefef;}
+.orderDetailHeader,	.orderAddresses, .orderDetailsStuff{margin-bottom:12px;}
+.orderAddresses	{padding-right:24px; width:28%;}
+.orderDetailsStuff	{width:69%; text-align:left;}
+.orderAddresses address	{margin-bottom:12px;}
+
+.orderStuffItemRow td	{padding:0 12px 12px 0;}
+
+.orderDetailButtonBar	{margin-bottom:12px;}
+.orderDetailButtonBar button	{padding:2px 6px;}
+
+.customerNotes, .orderNotes	{width:49%; padding:12px 0;}
+.notes .note	{padding-bottom:24px;}
+.notes .editable	{display:block;}
+
+.notes textarea	{min-height:60px; width:100%;}
 
 /*
 
