@@ -17,6 +17,7 @@ app.vars.extensions = [
 	{"namespace":"myRIA","filename":"quickstart.js","callback":"startMyProgram"}
 	];
 
+app.vars.catTemplates = {};
 
 /*
 app.vars.scripts is an object containing a list of scripts that are required/desired.
