@@ -559,7 +559,9 @@ NOTES
 					var imageAttr = "zoovy:prod_image";
 					imageAttr += P.int ? P.int : "1";
 					P.width = P.width ? P.width : 600;
+					//P.width = P.width ? P.width : 900;
 					P.height = P.height ? P.height : 660;
+					//P.height = P.height ? P.height : screen.height * .8;
 					
 					var $parent = this.handleParentForModal(parentID)
 

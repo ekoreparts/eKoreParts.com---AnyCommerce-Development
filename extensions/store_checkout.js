@@ -68,7 +68,7 @@ a callback was also added which just executes this call, so that checkout COULD 
 					"analyticsdata":"", //must be set, even if blank.
 					"edit_cart_url" : zGlobals.appSettings.https_app_url+"#cart?show=cart&sessionId="+app.sessionId,
 					"continue_shopping_url" : zGlobals.appSettings.https_app_url+"?sessionId="+app.sessionId,
-					'_tag':{'callback':'proceedToGoogleCheckout','extension':'convertSessionToOrder','datapointer':'cartGoogleCheckoutURL'}
+					'_tag':{'callback':'proceedToGoogleCheckout','extension':'store_checkout','datapointer':'cartGoogleCheckoutURL'}
 					},'immutable');
 				}
 			}, //cartGoogleCheckoutURL	
@@ -270,6 +270,7 @@ _gaq.push(['_trackEvent','Checkout','App Event','Attempting to create order']);
 				},
 			onError : function(responseData,uuid)	{
 				$('#chkoutPlaceOrderBtn').removeAttr('disabled').removeClass('ui-state-disabled'); // re-enable checkout button on checkout page.
+				app.u.dump("error in checkout");
 				app.u.throwMessage(responseData,uuid);
 				}
 			},
@@ -575,39 +576,6 @@ _gaq.push(['_trackEvent','Checkout','App Event','Payment failure']);
 				}, //showServerErrors
 
 
-
-//pretty straightforward. If a cid is set, the session has been authenticated.
-//if the cid is in the cart/local but not the control, set it. most likely this was a cart passed to us where the user had already logged in or (local) is returning to the checkout page.
-//if no cid but email, they are a guest.
-//if logged in via facebook, they are a thirdPartyGuest.
-//this could easily become smarter to take into account the timestamp of when the session was authenticated.
-			
-			determineAuthentication : function(){
-				var r = 'none';
-//was running in to an issue where cid was in local, but user hadn't logged in to this session yet, so now both cid and username are used.
-				if(app.data.appBuyerLogin && app.data.appBuyerLogin.cid)	{r = 'authenticated'}
-				else if(app.vars.cid && app.u.getUsernameFromCart())	{r = 'authenticated'}
-				else if(app.model.fetchData('cartItemsList') && app.u.isSet(app.data.cartItemsList.cart.cid))	{
-					r = 'authenticated';
-					app.vars.cid = app.data.cartItemsList.cart.cid;
-					}
-//need to run third party checks prior to default 'guest' check because data.bill_email will get set for third parties
-//and all third parties would get 'guest'
-				else if(typeof FB != 'undefined' && !jQuery.isEmptyObject(FB) && FB['_userStatus'] == 'connected')	{
-					r = 'thirdPartyGuest';
-//					app.thirdParty.fb.saveUserDataToSession();
-					}
-				else if(app.model.fetchData('cartItemsList') && app.data.cartItemsList.cart['data.bill_email'])	{
-					r = 'guest';
-					}
-				else	{
-					//catch.
-					}
-//				app.u.dump('store_checkout.u.determineAuthentication run. authstate = '+r); 
-
-				return r;
-				},
-			
 	
 
 /*

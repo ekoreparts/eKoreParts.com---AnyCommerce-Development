@@ -249,7 +249,7 @@ _gaq.push(['_trackEvent','Checkout','User Event','Create order button pushed (va
 		init : {
 			onSuccess : function()	{
 //				app.u.dump('BEGIN app.ext.convertSessionToOrder.init.onSuccess');
-				app.model.fetchNLoadTemplates('extensions/checkout_nice/templates.html',theseTemplates);
+				app.model.fetchNLoadTemplates('extensions/checkout_stage3_nice/templates.html',theseTemplates);
 				var r; //returns false if checkout can't load due to account config conflict.
 //				app.u.dump('BEGIN app.ext.convertSessionToOrder.init.onSuccess');
 				if(!zGlobals || $.isEmptyObject(zGlobals.checkoutSettings))	{
@@ -1855,7 +1855,32 @@ the refreshCart call can come second because none of the following calls are upd
 
 
 		renderFormats : {
-
+				
+//displays the shipping method followed by the cost.
+//is used in cart summary total during checkout.
+			shipInfoByIdCustom : function($tag,data)	{
+				var o = '';
+//				app.u.dump('BEGIN app.renderFormats.shipInfo. (formats shipping for minicart)');
+//				app.u.dump(data);
+				var L = app.data.cartShippingMethods['@methods'].length;
+				for(var i = 0; i < L; i += 1)	{
+//					app.u.dump(' -> method '+i+' = '+app.data.cartShippingMethods['@methods'][i].id);
+					if(app.data.cartShippingMethods['@methods'][i].id == data.value)	{
+						var pretty = app.u.isSet(app.data.cartShippingMethods['@methods'][i]['pretty']) ? app.data.cartShippingMethods['@methods'][i]['pretty'] : app.data.cartShippingMethods['@methods'][i]['name'];  //sometimes pretty isn't set. also, ie didn't like .pretty, but worked fine once ['pretty'] was used.
+						o = "<span class='orderShipMethod'>"+pretty+": <\/span>";
+//only show amount if not blank.
+						if(app.data.cartShippingMethods['@methods'][i].amount)	{
+							if(app.data.cartShippingMethods['@methods'][i].amount == 0)	{ o+= 'FREE'}
+							else	{
+								o += "<span class='orderShipAmount'>"+app.u.formatMoney(app.data.cartShippingMethods['@methods'][i].amount,' $',2,false)+"<\/span>";
+								}
+							}
+						break; //once we hit a match, no need to continue. at this time, only one ship method/price is available.
+						}
+					}
+				$tag.html(o);
+				}, //shipInfoById
+				
 			shipMethodsAsRadioButtons : function($tag,data)	{
 //				app.u.dump('BEGIN app.ext.convertSessionToOrder.formats.shipMethodsAsRadioButtons');
 				var o = '';

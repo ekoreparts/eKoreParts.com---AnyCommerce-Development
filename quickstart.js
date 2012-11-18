@@ -528,6 +528,9 @@ need to be customized on a per-ria basis.
 				return "<a href='#' onClick=\"return showContent('search',{'KEYWORDS':'"+suffix+"'}); \">"+phrase+"<\/a>"
 				},
 			":category" : function(suffix,phrase){
+				if(suffix.indexOf('.')!=0){
+					suffix = '.'+suffix;
+				}
 				return "<a href='#category?navcat="+suffix+"' onClick='return showContent(\"category\",{\"navcat\":\""+suffix+"\"});'>"+phrase+"<\/a>"
 				},
 			":product" : function(suffix,phrase){
@@ -535,9 +538,27 @@ need to be customized on a per-ria basis.
 				},
 			":customer" : function(suffix,phrase){
 // ### this needs to get smarter. look at what the suffix is and handle cases. (for orders, link to orders, newsletter link to newsletter, etc)				
-				return "<a href='#customer?show="+suffix+"' onClick='return showContent({\"customer\",{\"show\":\""+suffix+"\"});'>"+phrase+"<\/a>"
+				return "<a href='#customer?show="+suffix+"' onClick='return showContent(\"customer\",{\"show\":\""+suffix+"\"});'>"+phrase+"<\/a>"
+				},
+			":policy" : function(suffix,phrase){
+				return "<a href='#company?show="+suffix+"' onClick='return showContent(\"company\",{\"show\":\""+suffix+"\"});'>"+phrase+"<\/a>"
+			},
+
+			":app" : function(suffix,phrase){
+				var output; //what is returned.
+				if(suffix == 'about')	{
+					output = "<a href='#company?show="+suffix+"' onClick='return showContent(\"company\",{\"show\":\""+suffix+"\"});'>"+phrase+"<\/a>"	
 				}
-			}, //wiki
+				else if(suffix == 'contact')	{
+					output = "<a href='#company?show="+suffix+"' onClick='return showContent(\"company\",{\"show\":\""+suffix+"\"});'>"+phrase+"<\/a>"	
+				}
+				else	{
+					//we'll want to do something fantastic here.
+					output = phrase;
+				}
+				return output;
+			},
+		}, //wiki
 
 
 
@@ -1024,7 +1045,7 @@ P.listID (buyer list id)
 					$ele = $("<div />").attr('id','youtubeVideoModal').appendTo('body');
 					}
 				$ele.empty().append("<iframe style='z-index:1;' width='560' height='315' src='https://www.youtube.com/embed/"+videoid+"' frameborder='0' allowfullscreen></iframe>"); //clear any past videos.
-				$ele.dialog({modal:true,width:600,height:400,autoOpen:false});
+				$ele.dialog({title: "Product Video",modal:true,width:600,height:400,autoOpen:false,close: function(event, ui){$(this).dialog('destroy').remove();}});
 				$ele.dialog('open');
 				return false;
 				},
@@ -1069,28 +1090,32 @@ P.listID (buyer list id)
 
 
 //assumes the faq are already in memory.
-			showFAQbyTopic : function(topicID)	{
+			showFAQbyTopic : function(topicID)	{	
 				app.u.dump("BEGIN showFAQbyTopic ["+topicID+"]");
 				var templateID = 'faqQnATemplate'
-				var $target = $('#faqDetails4Topic_'+topicID).empty().show();
+
 				if(!topicID)	{
 					app.u.throwMessage("Uh Oh. It seems an app error occured. Error: no topic id. see console for details.");
 					app.u.dump("a required parameter (topicID) was left blank for myRIA.a.showFAQbyTopic");
-					}
+				}
 				else if(!app.data['appFAQs'] || $.isEmptyObject(app.data['appFAQs']['@detail']))	{
 					app.u.dump(" -> No data is present");
-					}
+				}
 				else	{
-					var L = app.data['appFAQs']['@detail'].length;
-					app.u.dump(" -> total #faq: "+L);
-					for(var i = 0; i < L; i += 1)	{
-						if(app.data['appFAQs']['@detail'][i]['TOPIC_ID'] == topicID)	{
-							app.u.dump(" -> faqid matches topic: "+app.data['appFAQs']['@detail'][i]['ID']);
-							$target.append(app.renderFunctions.transmogrify({'id':topicID+'_'+app.data['appFAQs']['@detail'][i]['ID'],'data-faqid':+app.data['appFAQs']['@detail'][i]['ID']},templateID,app.data['appFAQs']['@detail'][i]))
+					var $target = $('#faqDetails4Topic_'+topicID).toggle();
+					if($target.children().length)	{} //if children are present, this faq topic has been opened before or is empty. no need to re-render content.
+					else	{
+						var L = app.data['appFAQs']['@detail'].length;
+						app.u.dump(" -> total #faq: "+L);
+						for(var i = 0; i < L; i += 1)	{
+							if(app.data['appFAQs']['@detail'][i]['TOPIC_ID'] == topicID)	{
+								app.u.dump(" -> faqid matches topic: "+app.data['appFAQs']['@detail'][i]['ID']);
+								$target.append(app.renderFunctions.transmogrify({'id':topicID+'_'+app.data['appFAQs']['@detail'][i]['ID'],'data-faqid':+app.data['appFAQs']['@detail'][i]['ID']},templateID,app.data['appFAQs']['@detail'][i]))
 							}
 						}
 					}
-				} //showFAQbyTopic
+				}
+			} //showFAQbyTopic
 		
 		
 			}, //action [a]
@@ -1356,7 +1381,11 @@ P.listID (buyer list id)
 				case 'company':
 					relativePath = '#company?show='+P.show;
 					break;
-
+				
+				case 'search':
+					relativePath = '#search?KEYWORDS='+P.KEYWORDS;
+					break;
+					
 				default:
 					//uh oh. what are we?
 					relativePath = P.show;
@@ -1622,7 +1651,7 @@ return r;
 
 				}, //showCompany
 				
-				
+				/*
 			showSearch : function(P)	{
 //				app.u.dump("BEGIN myRIA.u.showSearch. P follows: ");
 //				app.u.dump(P);
@@ -1647,7 +1676,32 @@ return r;
 				app.ext.myRIA.u.handleTemplateFunctions(P);
 
 				}, //showSearch
+				*/
+ showSearch : function(P) {
+//    app.u.dump("BEGIN myRIA.u.showSearch. P follows: ");
+//    app.u.dump(P);
+    P.templateID = 'searchTemplate'
+    P.state = 'onInits';
+    app.ext.myRIA.u.handleTemplateFunctions(P);
 
+    $('#mainContentArea').empty().append(app.renderFunctions.createTemplateInstance(P.templateID,'mainContentArea_search'))
+   
+
+//add item to recently viewed list IF it is not already in the list.
+    if($.inArray(P.KEYWORDS,app.ext.myRIA.vars.session.recentSearches) < 0) {
+     app.ext.myRIA.vars.session.recentSearches.unshift(P.KEYWORDS);
+     }
+    app.ext.myRIA.u.showRecentSearches();
+    app.ext.store_search.u.handleElasticSimpleQuery(P.KEYWORDS,{'callback':'handleElasticResults','extension':'store_search','templateID':'productListTemplateResults','parentID':'resultsProductListContainer'});
+//legacy search.
+//    app.ext.store_search.calls.searchResult.init(P,{'callback':'showResults','extension':'myRIA'});
+    // DO NOT empty altSearchesLis here. wreaks havoc.
+    app.model.dispatchThis();
+
+    P.state = 'onCompletes'; //needed for handleTemplateFunctions.
+    app.ext.myRIA.u.handleTemplateFunctions(P);
+
+    }, //showSearch
 
 
 //pio is PageInfo object
@@ -1896,11 +1950,15 @@ if(!catSafeID)	{
 	app.u.throwMessage('Oops!  It seems an error occured. You can retry whatever you just did and hopefully you will meet with more success. If error persists, please try again later or contact the site administrator. We apologize for any inconvenience.<br \/>[err: no navcat passed into myRIA.showPage]');
 	}
 else	{
+	
 	if(P.templateID){
 		//templateID 'forced'. use it.
 		}
 	else if(catSafeID == '.' || P.pageType == 'homepage')	{
 		P.templateID = 'homepageTemplate'
+		}
+	else if(app.vars.catTemplates[catSafeID]){
+		P.templateID = app.vars.catTemplates[catSafeID]
 		}
 	else	{
 		P.templateID = 'categoryTemplate'
@@ -2235,7 +2293,7 @@ return r;
 			createTemplateFunctions : function()	{
 
 				app.ext.myRIA.template = {};
-				var pageTemplates = new Array('categoryTemplate','productTemplate','companyTemplate','customerTemplate','homepageTemplate','searchTemplate','cartTemplate','checkoutTemplate','pageNotFoundTemplate');
+				var pageTemplates = new Array('categoryTemplate','productTemplate','companyTemplate','customerTemplate','homepageTemplate','searchTemplate','cartTemplate','checkoutTemplate','pageNotFoundTemplate','categoryTemplateTour','satisfactionGuarantee','subcatandbannerlist');
 				var L = pageTemplates.length;
 				for(var i = 0; i < L; i += 1)	{
 					app.ext.myRIA.template[pageTemplates[i]] = {"onCompletes":[],"onInits":[]};

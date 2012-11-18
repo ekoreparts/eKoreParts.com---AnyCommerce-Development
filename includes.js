@@ -1063,10 +1063,30 @@ this was necessary because otherwise the converted html was output as <a href...
 						else
 							output = "<a href=\""+suffix+"\" target='popup'>"+phrase+"</a>";
 						break;
+					
+					case ":policy" :
+						if(linkCmdPointer && !$.isEmptyObject(app.ext[linkCmdPointer].wiki) && typeof app.ext[linkCmdPointer].wiki[":policy"] == 'function')
+							output = app.ext[linkCmdPointer].wiki[":policy"](suffix,phrase)
+						else
+							output = "<a href=\""+domain+"/policy/"+suffix+"/\">"+phrase+"</a>"
+						break;	
+
+
+					case ":app" :
+						if(linkCmdPointer && !$.isEmptyObject(app.ext[linkCmdPointer].wiki) && typeof app.ext[linkCmdPointer].wiki[":app"] == 'function')
+							output = app.ext[linkCmdPointer].wiki[":app"](suffix,phrase)
+						else	{
+							app.u.dump("WARNING! no app handle/token specified (required per app): "+chunk);
+							output = phrase;
+						}
+						break;						
+					
 					default:
 						output = "<!-- unhandled_token: "+chunk+" -->"+phrase;
 						break;
 					}
+					
+					
 
 
 				// console.log("phrase["+phrase+"] operation["+operation+"] suffix["+suffix+"]");
@@ -1541,8 +1561,6 @@ if (!this.JSON) {
 // remove the JSON parse function.
 
 }());
-
-
 
 
 
