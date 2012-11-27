@@ -261,19 +261,30 @@ app.u.throwTestimonial = function()	{
 //	app.u.dump("BEGIN app.u.throwTestimonial");
 	//alert("throwing testimonial");
 	if(app.data['appReviewsList|TESTIMONIAL'])	{
+		$('#testimonials').removeClass("displayNone");
 		var RA = app.data['appReviewsList|TESTIMONIAL']['@reviews']; //Review Array
-		var R = Math.floor((Math.random()*RA.length));
-//		app.u.dump("R: "+R);
-		var $target = $('#testimonials')
-		$target.empty().show();
+		app.u.dump("Testimonial length = "+RA.length);
+		if(RA.length != 0){
+			var R = Math.floor((Math.random()*RA.length));
+	//		app.u.dump("R: "+R);
+			if(RA[R].MESSAGE == ""){
+				$('#testimonials').addClass("displayNone");
+			} else {
+				var $target = $('#testimonials')
+				$target.empty().show();
+				
+				var $img = $("<img src=\"img\/testimonial.png\"\/>");
+				$target.append($img);
+				
+				var $bq = $("<blockquote \/>").addClass('clearfix');
+				$bq.append("<p id=\"quote\">"+RA[R].MESSAGE+"<\/p>");
+				$bq.append("<p class='alignRight'>&mdash; "+RA[R].CUSTOMER_NAME+" ("+RA[R].LOCATION+")<\/p>");
+				$target.append($bq);
+			}
+		} else {
+			$('#testimonials').addClass("displayNone");
+		}
 		
-		var $img = $("<img src=\"img\/testimonial.png\"\/>");
-		$target.append($img);
-		
-		var $bq = $("<blockquote \/>").addClass('clearfix');
-		$bq.append("<p id=\"quote\">"+RA[R].MESSAGE+"<\/p>");
-		$bq.append("<p class='alignRight'>&mdash; "+RA[R].CUSTOMER_NAME+" ("+RA[R].LOCATION+")<\/p>");
-		$target.append($bq);
 		}
 	}
 
