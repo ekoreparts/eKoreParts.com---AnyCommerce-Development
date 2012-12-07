@@ -557,7 +557,7 @@ need to be customized on a per-ria basis.
 					output = phrase;
 				}
 				return output;
-			},
+			}
 		}, //wiki
 
 
