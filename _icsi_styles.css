@@ -491,9 +491,13 @@ div.desc:last-of-type {
 #appPreView {
 	text-align:center;
 	width: 500px;
-	height: 137px;
+	height: 250px;
 	background: white;
 	margin-top: 6px;
+}
+
+#browserMsg {
+	margin: 30px;
 }
 
 #appPreView div.logo{
