@@ -122,7 +122,6 @@ app.u.throwMessage = function(m)	{
 
 //put any code that you want executed AFTER the app has been initiated in here.  This may include adding onCompletes or onInits for a given template.
 app.u.appInitComplete = function()	{
-	
 	app.u.dump("Executing myAppIsLoaded code...");
 	app.u.loadScriptsByPass(2,true); //loads the rest of the scripts.
 	app.ext.store_product.calls.appReviewsList.init('TESTIMONIAL',{'callback':'throwTestimonial'},'passive'); //fetch testimonials
@@ -178,6 +177,12 @@ app.u.appInitComplete = function()	{
 				});
 			}
 		})
+		setTimeout(
+			function(){
+				app.u.throwMessage(app.u.statusMsgObject('To optimize your experience with this site, please update to the latest version of your current browser, or install a free, modern browser such as <a target="_blank" href="http://www.mozilla.org/en-US/firefox/new/">Firefox</a> or <a target="_blank" href="https://www.google.com/intl/en/chrome/browser/">Chrome</a>.'));
+			},
+			1000);
+	
 	}
 	
 
