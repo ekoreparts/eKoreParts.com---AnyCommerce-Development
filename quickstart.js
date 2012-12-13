@@ -543,10 +543,6 @@ need to be customized on a per-ria basis.
 			":policy" : function(suffix,phrase){
 				return "<a href='#company?show="+suffix+"' onClick='return showContent(\"company\",{\"show\":\""+suffix+"\"});'>"+phrase+"<\/a>"
 			},
-			":url" : function(suffix,phrase){
-				return "<a href='"+suffix+"' target='_blank'>"+phrase+"<\/a>"
-			},
-
 			":app" : function(suffix,phrase){
 				var output; //what is returned.
 				if(suffix == 'about')	{
