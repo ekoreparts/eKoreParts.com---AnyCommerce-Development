@@ -712,7 +712,8 @@ Parse.Simple.Base.Rule.prototype = {
                 // workaround for bad IE
                 data = data.replace(/\n/g, ' \r');
             }
-            node.appendChild(document.createTextNode(data));
+            //node.appendChild(document.createTextNode(data));
+			node.innerHTML += data;
         }
     }    
 };
